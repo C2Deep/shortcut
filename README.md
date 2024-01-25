@@ -1,7 +1,7 @@
 __*shortcut*__ program is to manage the shortcuts like
 list, add, edit and remove shortcuts. 
 
-__*shortcut-monitor*__ program monitor the keyboard to detect the keys combination up to 10 keys at once (8 keys combination is the maximum on my machine) and execute the associated task.
+__*shortcut-monitor*__ program monitor the keyboard to detect the keys combination from 2 up to 8 keys at once (8 keys combination is the maximum on my machine <ins>but</ins> you can change it within both programs source code and recompile) and execute the associated task.
 
 __Enviroment__:
     Linux
