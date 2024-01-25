@@ -19,7 +19,7 @@ struct Keys
 {
     unsigned char *kCodes;            // Array of binary representation of the key
     unsigned char kSize;              // Size of the array
-    bool kComboFlag;                  // Keys combination status
+    bool kComboFlag;                  // Keys combination flag status
 };
 
 const char CHUNCK = sizeof(struct input_event);
