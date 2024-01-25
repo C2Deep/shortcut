@@ -1,4 +1,4 @@
-// Detect presence of shortCut
+// Detect the shortcut
 #include<stdio.h>
 #include<stdbool.h>                    // true, false
 #include<string.h>                     // string functions (str***())
