@@ -28,4 +28,4 @@ __Usage__:
 Both programs (__*shortcut*__ and __*shortcut-monitor*__) __must__ run with __sudo__ privileges to work.
 
 > [!NOTE]
-Although the shortcut-monitor program run with __sudo__ privileges, it does run the task associated with the shortcut as __normal user__.
+Although the shortcut-monitor program run with __sudo__ privileges, it does run the task associated with the shortcut as __$USER__.
