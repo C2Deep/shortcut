@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
         if(KeysInfo->kComboFlag)
             if((exeTask = search_combo(KeysInfo)))
             {
-                printf("Executing: %s.\n", exeTask);
+                printf("Executing: %s\n", exeTask);
                 length = strnlen(exeTask, TASK_SIZE);
                 unSudoTask =  realloc_mem(unSudoTask, length + len, "unSudoTask");
                 sprintf(unSudoTask, "sudo -u %s %s",argv[1], exeTask);  // turn off sudo
