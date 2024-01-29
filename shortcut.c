@@ -26,7 +26,7 @@ const char CHUNCK = sizeof(struct input_event);
 struct Keys *KeysInfo = NULL;
 struct input_event *pEvent = NULL;
 char *SCExist = NULL;
-char **pKeys = NULL;
+char **pKeys = NULL;            // hold text and numeric representation of keys combination
 char task[TASK_SIZE];
 char key[MAX_KEY];
 char choice = 'Y';
@@ -587,7 +587,7 @@ void remove_sc_file(struct Keys *KeyCodes)
 
     tmpFileBuf[0] = '\0';
 
-    for(; !(feof(pKeysTasksFile)) ; )
+    for(; !(feof(pKeysTasksFile)) ;)
     {
         fread(&lengthC, sizeof(char), 1, pKeysTasksFile);    // number of codes array
         fread(codesBuf, sizeof(char), lengthC, pKeysTasksFile);
@@ -605,9 +605,14 @@ void remove_sc_file(struct Keys *KeyCodes)
          strncat(tmpFileBuf, &lengthT, 1);
          strncat(tmpFileBuf, taskBuf, lengthT);
 
-         fwrite(tmpFileBuf, lengthC + lengthT + 2, 1, pTmpFile);
+         if(!(feof(pKeysTasksFile)))
+         {
+            fwrite(tmpFileBuf, lengthC + lengthT + 2, 1, pTmpFile);
+            tmpFileBuf[0] = '\0';
+         }
+         else
+             break;
 
-         tmpFileBuf[0] = '\0';
     }
 
     fclose(pKeysTasksFile);
@@ -699,12 +704,13 @@ void list_sc(void)
     unsigned char lengthC = 0, lengthT = 0;
     char *tmpFileBuf = NULL;
     unsigned int counter = 0;
-    char **pKeys = NULL;
+
     struct Keys *KeysInfo = NULL;
 
     if(!(pKeysTasksFile = fopen("KEYSTASKS.sc", "r")))
     {
-        printf("THERE IS NO SHORTCUTS !\n");
+        printf("\e[1;1H\e[2J"); // clear the screen
+        printf("\n\n\n           THERE IS NO SHORTCUTS !\n");
         printf("\n\n\n\n         Press Enter ...\n");
         getchar();
         return;
@@ -779,13 +785,14 @@ void add_sc(void)
             {
                 terminal_input(true);    // Unlock terminal to read from keyboard
 
+                pKeys = str_keys(KeysInfo);
+
                 if((SCExist = search_combo(KeysInfo)))
                 {
                     printf("\n-------------------------------------\n");
                     printf("\n\n      USED SHORTCUT\n");
                     printf("   '.'.'.'.'.'.'.'.'.'\n\n");
 
-                    pKeys = str_keys(KeysInfo);
                     printf("SHORTCUT        : %s\n", pKeys[1]);
                     printf("TASK            : %s\n\n\n", SCExist);
 
@@ -803,11 +810,9 @@ void add_sc(void)
                 printf("Enter the task for the key combination (less than %d characters) : ", TASK_SIZE - 29);
                 fgets(task, TASK_SIZE, stdin);
 
-                if(task[strnlen(task, TASK_SIZE) - 1] == '\n')
                 task[strnlen(task, TASK_SIZE) - 1] = '\0';
-
                 strcat(task, " 1> /dev/null 2> /dev/null &");     // run the task as background process to not block next shortcut...
-                                                       // ...and redirect all output to null file
+                                                                  // ...and redirect all output to null file
 
                 printf("\nKeys combinations    : %s", pKeys[1]);
                 printf("\nTask                 : %s\n", task);
