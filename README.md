@@ -28,7 +28,7 @@ __Usage__:
 ```
 > Tested on Kubuntu 22.04.3 LTS
 
-> If the bash code didn't work for you then check [how to find keyboard event file](https://unix.stackexchange.com/questions/82064/how-to-get-the-actual-keyboard-device-given-the-output-of-proc-bus-input-device)
+> If the above shell snippet didn't work for you then check [how to find keyboard event file](https://unix.stackexchange.com/questions/82064/how-to-get-the-actual-keyboard-device-given-the-output-of-proc-bus-input-device)
 
 > [!IMPORTANT]
 Both programs (__*shortcut*__ and __*shortcut-monitor*__) __must__ run with __sudo__ privileges to work.
