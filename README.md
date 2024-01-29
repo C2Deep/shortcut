@@ -24,7 +24,7 @@ __Usage__:
 > [!TIP]
 > path_to_keyboard_event_file or keyboard file handler could be found using shell commands :
 ```
-  echo "/dev/input/by-path/"$(ls/dev/input/by-path | grep kbd)
+  echo "/dev/input/by-path/"$(ls /dev/input/by-path | grep kbd)
 ```
 > Tested on Kubuntu 22.04.3 LTS
 
