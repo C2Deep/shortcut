@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        printf("Usage: sudo ./shortCut Path_to_Keyboard_Event_file\n");
+        fprintf(stdout, "Usage: sudo ./%s Path_to_Keyboard_Event_file\n", arg[0]);
         return -1;
     }
 
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
 void keys_combo(struct input_event *pEvent, struct Keys *KeysInfo)
 {
     static unsigned char counter = 0;
-    static unsigned char lastCode = 0xff;   // just big number to not interfere with the codes in array
+    static unsigned char lastCode = 0xff;   // Default value
     static bool keyCombo = false;
     static bool comboBreak = true;      // Break the rest of the keys to printed after the first key relasesd
 
