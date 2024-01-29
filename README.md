@@ -22,7 +22,7 @@ __Usage__:
 ```
 
 > [!TIP]
-> path_to_keyboard_event_file or keyboard file handler could be found using some bash :
+> path_to_keyboard_event_file or keyboard file handler could be found using shell commands :
 ```
   echo "/dev/input/by-path/"$(ls/dev/input/by-path | grep kbd)
 ```
