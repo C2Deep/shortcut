@@ -69,6 +69,7 @@ int main(int argc, char *argv[])
         if(KeysInfo->kComboFlag)
             if((exeTask = search_combo(KeysInfo)))
             {
+                printf("\e[1;1H\e[2J"); // clear the screen
                 printf("Executing: %s\n", exeTask);
                 length = strnlen(exeTask, TASK_SIZE);
                 unSudoTask =  realloc_mem(unSudoTask, length + len, "unSudoTask");
