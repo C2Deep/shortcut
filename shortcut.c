@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        fprintf(stdout, "Usage: sudo ./%s Path_to_Keyboard_Event_file\n", arg[0]);
+        fprintf(stdout, "Usage: sudo ./%s Path_to_Keyboard_Event_file\n", argv[0]);
         return -1;
     }
 
