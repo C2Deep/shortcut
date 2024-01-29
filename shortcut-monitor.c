@@ -75,7 +75,6 @@ int main(int argc, char *argv[])
                 unSudoTask =  realloc_mem(unSudoTask, length + len, "unSudoTask");
                 sprintf(unSudoTask, "sudo -u %s %s",argv[1], exeTask);  // turn off sudo
                 system(unSudoTask);
-
             }
     }
     free(exeTask);
