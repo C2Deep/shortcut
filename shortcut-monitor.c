@@ -1,15 +1,18 @@
-// Detect the shortcut
-#include<stdio.h>
+// Detect shortCut keys combination and execute the associated task
+
+#include<stdio.h>                      // input/output functions
 #include<stdbool.h>                    // true, false
 #include<string.h>                     // string functions (str***())
 #include<stdlib.h>                     // malloc(), realloc(), system()
 #include <fcntl.h>                     // open()
-#include<unistd.h>                     // read(), write()
+#include<unistd.h>                     // read(), write(), getlogin()
 #include<linux/input.h>                // for struct input_event
+#include<string.h>                     // strlen(), strstr()
+#include<ctype.h>                      // toupper()
 
 #define TASK_SIZE      256           // Maximum number of characters for a task array
 #define MAX_KEYSCOMBO  8             // Maximum number of keys pressed in combination at once
-#define MAX_USER       64            // Maximum number of characters in USERNAME enviroment variable
+
 
 struct Keys
 {
@@ -21,6 +24,8 @@ struct Keys
 char *search_combo(struct Keys *KeyCodes);
 void keys_combo(struct input_event *pEvent, struct Keys *KeysCodes);
 void *realloc_mem(void* mem,size_t size, const char* varName);
+int find_event_num(char* deviceName);
+char *find_device(char *deviceName);
 
 int main(int argc, char *argv[])
 {
@@ -30,24 +35,31 @@ int main(int argc, char *argv[])
     char **pKeys = NULL;
     char *exeTask = NULL;
     char *unSudoTask = NULL;
+    char *userName = NULL;
+    char *devicePath = NULL;
     int KBfd = -1;
     unsigned char length = 0,
                   len   = 0;
 
-    if(argc == 3)
+    userName = getlogin();
+    if(!userName)
     {
-        len = strnlen(argv[1], MAX_USER) + 10;
-        if((KBfd = open(argv[2], O_RDONLY)) == -1)
-        {
-            fprintf(stderr, "Couldn't open Keyboard event file for reading.\n");
-            return -1;
-        }
-    }
-    else
-    {
-        fprintf(stderr, "Usage: sudo ./shortCutMonitor $USER  Path_To_Keyboard_Event_File\n");
+        fprintf(stderr, "Couldn't get the username.\n");
         return -1;
     }
+
+    len = strlen(userName) + 9;  // +9 "sudo -u" and '\0';
+
+    devicePath = find_device("keyboard");
+    if((KBfd = open(devicePath, O_RDONLY)) == -1)
+    {
+        fprintf(stderr, "Couldn't open Keyboard event file for reading.\n");
+        printf("Usage: sudo %s\n", argv[0]);
+        free(devicePath);
+        return -1;
+    }
+
+    free(devicePath);
 
     if(!(unSudoTask = malloc(1)))
     {
@@ -70,11 +82,12 @@ int main(int argc, char *argv[])
             if((exeTask = search_combo(KeysInfo)))
             {
                 printf("\e[1;1H\e[2J"); // clear the screen
-                printf("Executing: %s\n", exeTask);
+                printf("Executing: %s.\n", exeTask);
                 length = strnlen(exeTask, TASK_SIZE);
                 unSudoTask =  realloc_mem(unSudoTask, length + len, "unSudoTask");
-                sprintf(unSudoTask, "sudo -u %s %s",argv[1], exeTask);  // turn off sudo
+                sprintf(unSudoTask, "sudo -u %s %s",userName, exeTask);  // turn off sudo
                 system(unSudoTask);
+
             }
     }
     free(exeTask);
@@ -193,3 +206,91 @@ void *realloc_mem(void* mem, size_t size, const char* varName)
 
         return pTmp;
 }
+
+int find_event_num(char *deviceName)
+{
+    const unsigned char MAX_DEVICE_NAME = 255;
+    char buf[MAX_DEVICE_NAME];
+    char devNameTmp[MAX_DEVICE_NAME];
+    FILE *pfile = NULL;
+    char pathB[] = "/sys/class/input/event";  // Path Beginning
+    char pathE[] = "/device/name";            // Path Ending
+
+    int len = strlen(pathB) + 3 + strlen(pathE)  + 1;  // +3 for event0 to event999
+                                                       // +1 for '\0'
+
+
+    char *path = NULL;                             // Full path
+
+    if(!(path = malloc(len)))
+    {
+        fprintf(stderr, "Couldn't allocate memory for path.\n");
+        exit(-1);
+    }
+
+    for(int i = 0 ; ; ++i)
+    {
+        sprintf(path, "%s%d%s", pathB, i, pathE);
+        // printf("cheacking \"%s\" ...\n", path);
+        if(!(pfile = fopen(path, "r")))
+        {
+          //  printf("search is done.\n");
+            break;
+        }
+
+        fgets(buf, MAX_DEVICE_NAME, pfile);
+        buf[strlen(buf) - 1] = '\0';
+
+
+        for(int i = 0 ; buf[i] ; ++i)
+            buf[i] = toupper(buf[i]);
+
+        for(int i = 0 ;  ; ++i)
+        {
+            if(deviceName[i] == '\0')
+            {
+                devNameTmp[i] = '\0';
+                break;
+            }
+
+            devNameTmp[i] = toupper(deviceName[i]);
+        }
+
+        if(strstr(buf, devNameTmp))
+        {
+            // Device found
+            free(path);
+            return i;   // return event number
+        }
+
+        fclose(pfile);
+    }
+
+    free(path);
+    return -1;
+}
+
+char *find_device(char *deviceName)
+{
+    int eventNum = 0;
+
+    char pathB[] = "/dev/input/event"; // Path Beginning
+    char *path = NULL;
+
+     if((eventNum = find_event_num(deviceName)) == -1)
+     {
+         fprintf(stderr, "%s device NOT found.\n", deviceName);
+         exit(-1);
+     }
+
+    if(!(path = malloc(strlen(pathB + 3 + 1))))     // +3 for event0-999 & +1 for '\0';
+    {
+        fprintf(stderr, "Couldn't allocate memory for path.\n");
+        exit(-1);
+    }
+
+    sprintf(path, "%s%d", pathB, eventNum);
+
+    return path;    // Don't forget to free
+}
+
