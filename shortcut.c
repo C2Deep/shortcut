@@ -65,20 +65,18 @@ void add_sc(void);
 void edit_sc(void);
 // Remove shortcut
 void remove_sc(void);
+// Find the event file associated with the device
+char *find_device(char *deviceName);
+int find_event_num(char* deviceName); // helper function
 
 int main(int argc, char *argv[])
 {
-    if(argc == 2)
+
+
+    if((KBfd = open(find_device("Keyboard"), O_RDONLY)) == -1)
     {
-        if((KBfd = open(argv[1], O_RDONLY)) == -1)
-        {
-            fprintf(stderr, "Couldn't open Keyboard event file \"%s\" for reading.\n", argv[1]);
-            return -1;
-        }
-    }
-    else
-    {
-        fprintf(stdout, "Usage: sudo %s Path_to_Keyboard_Event_file\n", argv[0]);
+        fprintf(stderr, "Couldn't open Keyboard event file \"%s\" for reading.\n", argv[1]);
+        printf("Usage: sudo %s\n", argv[0]);
         return -1;
     }
 
@@ -972,4 +970,91 @@ void remove_sc(void)
     free(pEvent);
     free(KeysInfo->kCodes);
     free(KeysInfo);
+}
+
+int find_event_num(char *deviceName)
+{
+    const unsigned char MAX_DEVICE_NAME = 255;
+    char buf[MAX_DEVICE_NAME];
+    char devNameTmp[MAX_DEVICE_NAME];
+    FILE *pfile = NULL;
+    char pathB[] = "/sys/class/input/event";  // Path Beginning
+    char pathE[] = "/device/name";            // Path Ending
+
+    int len = strlen(pathB) + 3 + strlen(pathE)  + 1;  // +3 for event0 to event999
+                                                       // +1 for '\0'
+
+
+    char *path = NULL;                             // Full path
+
+    if(!(path = malloc(len)))
+    {
+        fprintf(stderr, "Couldn't allocate memory for path.\n");
+        exit(-1);
+    }
+
+    for(int i = 0 ; ; ++i)
+    {
+        sprintf(path, "%s%d%s", pathB, i, pathE);
+        // printf("cheacking \"%s\" ...\n", path);
+        if(!(pfile = fopen(path, "r")))
+        {
+          //  printf("search is done.\n");
+            break;
+        }
+
+        fgets(buf, MAX_DEVICE_NAME, pfile);
+        buf[strlen(buf) - 1] = '\0';
+
+
+        for(int i = 0 ; buf[i] ; ++i)
+            buf[i] = toupper(buf[i]);
+
+        for(int i = 0 ;  ; ++i)
+        {
+            if(deviceName[i] == '\0')
+            {
+                devNameTmp[i] = '\0';
+                break;
+            }
+
+            devNameTmp[i] = toupper(deviceName[i]);
+        }
+
+        if(strstr(buf, devNameTmp))
+        {
+            // Device found
+            free(path);
+            return i;   // return event number
+        }
+
+        fclose(pfile);
+    }
+
+    free(path);
+    return -1;
+}
+
+char *find_device(char *deviceName)
+{
+    int eventNum = 0;
+
+    char pathB[] = "/dev/input/event"; // Path Beginning
+    char *path = NULL;
+
+     if((eventNum = find_event_num(deviceName)) == -1)
+     {
+         fprintf(stderr, "%s device NOT found.\n", deviceName);
+         exit(-1);
+     }
+
+    if(!(path = malloc(strlen(pathB + 3 + 1))))     // +3 for event0-999 & +1 for '\0';
+    {
+        fprintf(stderr, "Couldn't allocate memory for path.\n");
+        exit(-1);
+    }
+
+    sprintf(path, "%s%d", pathB, eventNum);
+
+    return path;    // Don't forget to free
 }
