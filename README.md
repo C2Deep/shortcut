@@ -15,23 +15,14 @@ __Compile and link__:
 ```
 __Usage__:
 ```
-    sudo ./shortcut path_to_keyboard_event_file
+    sudo ./shortcut
 ```
 ```
-    sudo ./shortcut-monitor $USER path_to_keyboard_event_file
+    sudo ./shortcut-monitor
 ```
-
-> [!TIP]
-> path_to_keyboard_event_file or keyboard file handler could be found using shell commands :
-```
-  echo "/dev/input/by-path/"$(ls /dev/input/by-path | grep kbd)
-```
-> Tested on Kubuntu 22.04.3 LTS
-
-> If the above shell snippet didn't work for you then check [how to find keyboard event file](https://unix.stackexchange.com/questions/82064/how-to-get-the-actual-keyboard-device-given-the-output-of-proc-bus-input-device)
 
 > [!IMPORTANT]
 Both programs (__*shortcut*__ and __*shortcut-monitor*__) __must__ run with __sudo__ privileges to work.
 
 > [!NOTE]
-Although the shortcut-monitor program run with __sudo__ privileges, it does run the task associated with the shortcut as __$USER__.
+Although the shortcut-monitor program run with __sudo__ privileges, it does run the task associated with the shortcut as __normal user__.
