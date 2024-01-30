@@ -1,4 +1,4 @@
-// Detect shortCut keys combination and execute the associated task
+// Detect shortcut keys combination and execute the associated task
 
 #include<stdio.h>                      // input/output functions
 #include<stdbool.h>                    // true, false
